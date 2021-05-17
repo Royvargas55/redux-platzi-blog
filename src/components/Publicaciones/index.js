@@ -8,12 +8,15 @@ import * as publicacionesActions from '../../actions/publicacionesActions';
 // Componentes
 import Spinner from '../general/Spinner';
 import Fatal from '../general/Fatal';
+import Comentarios from './Comentarios';
 
 const { traerTodos: usuariosTraerTodos } = usuariosActions;
 const { 
     traerTodos: publicacionesTraerTodos,
-    traerPorUsuario: publicacionesTraerPorUsuario 
-    } = publicacionesActions;
+    traerPorUsuario: publicacionesTraerPorUsuario,
+    abrirCerrar,
+    traerComentarios    
+} = publicacionesActions;
 
 export class Publicaciones extends Component {
 
@@ -59,11 +62,58 @@ export class Publicaciones extends Component {
         )
     }
 
+    ponerPublicaciones = () => {
+        const {
+            usuariosReducer,
+            usuariosReducer: { usuarios},
+            publicacionesReducer,
+            publicacionesReducer: { publicaciones },
+            match: { params: { key }}
+        } = this.props;
+
+        if (!usuarios.length) return;
+        if(usuariosReducer.error) return;
+
+        if(publicacionesReducer.cargando) return <Spinner />;
+        if(publicacionesReducer.error) return <Fatal error={publicacionesReducer.error} />
+
+        if(!publicaciones.length) return;
+        if(!('publicaciones_key' in usuarios[key])) return;
+
+        const { publicaciones_key } = usuarios[key];
+
+        return this.mostrarInfo(publicaciones, publicaciones_key)
+    }
+
+    mostrarInfo = (publicaciones, pub_key) => (
+        publicaciones[pub_key].map((publicacion, com_key) => (
+            <div key={ publicacion.id } className="pub_titulo"
+            onClick= {() => this.mostrarComentarios(pub_key, com_key, publicacion.comentarios)}>
+                <h2>
+                    { publicacion.title }
+                </h2>
+                <h3>
+                    { publicacion.body }
+                </h3>
+                {
+                    (publicacion.abierto) ? <Comentarios comentarios={publicacion.comentarios}/> : ''
+                }
+            </div>
+        ))
+    )
+
+    mostrarComentarios = (pub_key, com_key, comentarios) => {
+        this.props.abrirCerrar(pub_key, com_key);
+        if(!comentarios.length) {
+            this.props.traerComentarios(pub_key, com_key);
+        }
+    }
+
     render() {
-        console.log(this.props);
         return (
             <div>
                 {this.ponerUsuario()}
+                {this.ponerPublicaciones()}
             </div>
         )
     }
@@ -79,7 +129,9 @@ const mapStateToProps = ({usuariosReducer, publicacionesReducer}) => {
 const mapDispatchToProps = {
     usuariosTraerTodos,
     publicacionesTraerTodos,
-    publicacionesTraerPorUsuario
+    publicacionesTraerPorUsuario,
+    abrirCerrar,
+    traerComentarios
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Publicaciones);

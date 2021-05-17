@@ -5,10 +5,8 @@ import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom';
 import Usuario from './Usuarios/Index';
 import Menu from './Menu';
 import Publicaciones from './Publicaciones';
-
-const Tareas = () => {
-  return <h1>Tareas</h1>
-}
+import Tareas from './Tareas/index';
+import TareasGuardar from './Tareas/Guardar';
 
 const App = () => {
   return(
@@ -16,10 +14,12 @@ const App = () => {
       <Menu />
       <Switch>
         <div className="margen">
-          <Route exact path="/usuarios" component={Usuario}/>
+          <Route exact path="/" component={Usuario}/>
           <Route exact path="/tareas" component={Tareas}/>
           <Route exact path="/publicaciones/:key" component={Publicaciones}/>
-          <Redirect from="*" to="/usuarios"/>
+          <Route exact path="/tareas/guardar" component={TareasGuardar}/>
+          <Route exact path="/tareas/guardar/:usu_id/:tar_id" component={TareasGuardar}/>
+          <Redirect from="*" to="/"/>
         </div>
       </Switch>
     </BrowserRouter>
